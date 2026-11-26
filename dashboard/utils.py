@@ -384,17 +384,29 @@ def style_fig(fig, height: int = 370, title: str | None = None, has_top_legend: 
     return fig
 
 
+def databricks_configured() -> bool:
+    return all(
+        os.environ.get(k)
+        for k in ("DATABRICKS_HOST", "DATABRICKS_HTTP_PATH", "DATABRICKS_TOKEN")
+    )
+
+
 def render_website_footer():
+    src_label = (
+        "Databricks Unity Catalog (workspace.review_analytics)"
+        if databricks_configured()
+        else "Local Delta-Aligned Gold Parquet (Databricks-Compatible)"
+    )
     st.markdown(
-        """
+        f"""
         <div class="web-footer">
             <div>
                 <strong style="color:#f8fafc;">ReviewSense Analytics</strong> · 23RAI351 Big Data Analytics ·
-                Team No. 1: Sreenidhi (BL.EN.U4RAE24028) &amp; Lakshya Yarlagadda (BL.EN.U4RAE24063)
+                Team No. 1: Sreenidhi and Lakshya Yarlagadda
             </div>
             <div>
                 Faculty Guide: <strong style="color:#cbd5e1;">Dr. Ravi Kumar V.</strong> ·
-                Dataset: Amazon Reviews 2023 (1.14M Reviews · 543K Products)
+                Source: <strong style="color:#a5b4fc;">{src_label}</strong>
             </div>
         </div>
         """,
@@ -428,6 +440,33 @@ def load_gold_table(name: str) -> pd.DataFrame:
             "top_aspect", "top_aspect_pos_pct", "top_complaint", "top_complaint_pct",
             "reason_summary",
         ]
+
+    # Optional live Databricks Unity Catalog SQL Warehouse mode
+    databricks_tables = {
+        "agg_year_summary", "agg_year_category", "agg_monthly", "agg_brand",
+        "agg_top_words", "agg_complaints", "model_metrics",
+        "product_recommendations", "product_aspect_sentiment", "product_complaints",
+    }
+    if databricks_configured() and name in databricks_tables:
+        try:
+            from databricks import sql as dbsql
+
+            col_sql = ", ".join(read_cols) if read_cols else "*"
+            with dbsql.connect(
+                server_hostname=os.environ["DATABRICKS_HOST"],
+                http_path=os.environ["DATABRICKS_HTTP_PATH"],
+                access_token=os.environ["DATABRICKS_TOKEN"],
+            ) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(f"SELECT {col_sql} FROM workspace.review_analytics.{name}")
+                    df = cur.fetchall_arrow().to_pandas()
+            if name == "product_recommendations":
+                for cat_col in ["category", "recommendation", "confidence", "top_aspect", "top_complaint"]:
+                    if cat_col in df.columns:
+                        df[cat_col] = df[cat_col].astype("category")
+            return df
+        except Exception:
+            pass
 
     if os.path.exists(path):
         df = pd.read_parquet(path, columns=read_cols)
