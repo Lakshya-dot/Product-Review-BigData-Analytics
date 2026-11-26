@@ -2,7 +2,7 @@
 
 **Course:** `23RAI351` – Big Data Analytics (End-Semester Project)  
 **Faculty Guide:** Dr. Ravi Kumar V.  
-**Team No. 1:** Sreenidhi and Lakshya Yarlagadda  
+**Team Members:** Lakshya Yarlagadda and Sreenidhi 
 **Repository:** [Lakshya-dot/Product-Review-BigData-Analytics](https://github.com/Lakshya-dot/Product-Review-BigData-Analytics)
 
 ---
