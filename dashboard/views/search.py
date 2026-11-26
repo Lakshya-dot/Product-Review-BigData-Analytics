@@ -19,6 +19,7 @@ from utils import (
     SENTIMENT_COLORS,
     download_csv_button,
     load_gold_table,
+    load_product_features,
     render_kpi_card,
     render_page_header,
     style_fig,
@@ -191,9 +192,10 @@ with tab_single:
             unsafe_allow_html=True,
         )
 
-        if pd.notna(p.get("product_features")) and str(p["product_features"]).strip():
+        prod_feats = load_product_features(selected_asin, str(p["category"]))
+        if prod_feats and prod_feats.strip():
             with st.expander("Product Specifications & Key Features"):
-                for feat in str(p["product_features"]).split(" | "):
+                for feat in prod_feats.split(" | "):
                     if feat.strip():
                         st.markdown(f"- {feat.strip()}")
 

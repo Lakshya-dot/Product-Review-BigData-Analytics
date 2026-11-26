@@ -415,18 +415,62 @@ def download_csv_button(df: pd.DataFrame, filename: str, label: str = "Export CS
 @st.cache_data(show_spinner=False)
 def load_gold_table(name: str) -> pd.DataFrame:
     path = os.path.join(GOLD_DIR, f"{name}.parquet")
+    read_cols = None
+    if name == "product_recommendations":
+        # Defer heavy 368 MB product_features text until a single product is inspected
+        read_cols = [
+            "parent_asin", "category", "product_title", "brand", "price",
+            "reviews", "avg_rating", "positive_pct", "neutral_pct", "negative_pct",
+            "model_positive_pct", "verified_pct", "years_active",
+            "recent_year_pos_pct", "sentiment_trend",
+            "rating_score", "trend_score", "consistency_score", "complaint_inv_score",
+            "buy_score", "recommendation", "confidence",
+            "top_aspect", "top_aspect_pos_pct", "top_complaint", "top_complaint_pct",
+            "reason_summary",
+        ]
+
     if os.path.exists(path):
-        return pd.read_parquet(path)
-    shard_dir = os.path.join(GOLD_DIR, f"{name}_shards")
-    if os.path.isdir(shard_dir):
-        parts = sorted(
-            os.path.join(shard_dir, f)
-            for f in os.listdir(shard_dir)
-            if f.endswith(".parquet")
-        )
-        if parts:
-            return pd.concat([pd.read_parquet(p) for p in parts], ignore_index=True)
-    raise FileNotFoundError(f"Missing Gold table: {path}. Run scripts/build_local_gold.py first.")
+        df = pd.read_parquet(path, columns=read_cols)
+    else:
+        shard_dir = os.path.join(GOLD_DIR, f"{name}_shards")
+        if os.path.isdir(shard_dir):
+            parts = sorted(
+                os.path.join(shard_dir, f)
+                for f in os.listdir(shard_dir)
+                if f.endswith(".parquet")
+            )
+            if parts:
+                df = pd.concat([pd.read_parquet(p, columns=read_cols) for p in parts], ignore_index=True)
+            else:
+                raise FileNotFoundError(f"Missing Gold table: {path}")
+        else:
+            raise FileNotFoundError(f"Missing Gold table: {path}. Run scripts/build_local_gold.py first.")
+
+    if name == "product_recommendations":
+        for cat_col in ["category", "recommendation", "confidence", "top_aspect", "top_complaint"]:
+            if cat_col in df.columns:
+                df[cat_col] = df[cat_col].astype("category")
+    return df
+
+
+@st.cache_data(show_spinner=False)
+def load_product_features(parent_asin: str, category: str) -> str | None:
+    """Lazily read product_features for a single selected product without holding 368 MB in RAM."""
+    import polars as pl
+
+    single_path = os.path.join(GOLD_DIR, "product_recommendations.parquet")
+    shard_glob = os.path.join(GOLD_DIR, "product_recommendations_shards", "part_*.parquet")
+    src = single_path if os.path.exists(single_path) else shard_glob
+    res = (
+        pl.scan_parquet(src)
+        .filter((pl.col("parent_asin") == parent_asin) & (pl.col("category") == category))
+        .select("product_features")
+        .collect()
+    )
+    if res.height == 0:
+        return None
+    val = res["product_features"][0]
+    return str(val) if val is not None else None
 
 
 @st.cache_resource(show_spinner=False)
