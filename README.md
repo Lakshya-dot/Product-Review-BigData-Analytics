@@ -2,7 +2,7 @@
 
 **Course:** 23RAI351 – Big Data Analytics  
 **Faculty:** Dr. Ravi Kumar V.  
-**Team No. 1:** Sreenidhi (`BL.EN.U4RAE24028`) · Lakshya Yarlagadda (`BL.EN.U4RAE24063`)  
+**Team No. 1:** Sreenidhi and Lakshya Yarlagadda  
 **Dataset:** Amazon Reviews 2023 (McAuley Lab) — 1,140,000 genuine reviews (1,139,264 cleaned) across 6 categories & 543,496 unique products (`parent_asin`), date-shifted +3 years to **2023–2026**.
 
 ---
