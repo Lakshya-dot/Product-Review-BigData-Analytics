@@ -10,6 +10,10 @@
 
 # COMMAND ----------
 
+# MAGIC %pip install -q plotly
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ### CELL 1: Setup & Interactive Filter Widgets
 
