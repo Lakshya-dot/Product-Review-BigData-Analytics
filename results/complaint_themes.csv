@@ -1,0 +1,217 @@
+year,category,negative_reviews,theme,mentions,pct_of_negative
+2023,Beauty and Personal Care,6438,Price / value,1196,18.58
+2023,Beauty and Personal Care,6438,Quality / durability,1193,18.53
+2023,Beauty and Personal Care,6438,Does not work,1002,15.56
+2023,Beauty and Personal Care,6438,Smell / taste / skin,765,11.88
+2023,Beauty and Personal Care,6438,Return / refund,677,10.52
+2023,Beauty and Personal Care,6438,Not as described,652,10.13
+2023,Beauty and Personal Care,6438,Size / fit,584,9.07
+2023,Beauty and Personal Care,6438,Delivery / packaging,580,9.01
+2023,Beauty and Personal Care,6438,Battery / charging,105,1.63
+2023,Books,2031,Price / value,340,16.74
+2023,Books,2031,Size / fit,236,11.62
+2023,Books,2031,Not as described,230,11.32
+2023,Books,2031,Does not work,190,9.35
+2023,Books,2031,Quality / durability,179,8.81
+2023,Books,2031,Return / refund,152,7.48
+2023,Books,2031,Delivery / packaging,109,5.37
+2023,Books,2031,Smell / taste / skin,23,1.13
+2023,Books,2031,Battery / charging,12,0.59
+2023,Electronics,6698,Does not work,2556,38.16
+2023,Electronics,6698,Quality / durability,1943,29.01
+2023,Electronics,6698,Price / value,1420,21.2
+2023,Electronics,6698,Return / refund,1267,18.92
+2023,Electronics,6698,Size / fit,960,14.33
+2023,Electronics,6698,Battery / charging,860,12.84
+2023,Electronics,6698,Not as described,790,11.79
+2023,Electronics,6698,Delivery / packaging,540,8.06
+2023,Electronics,6698,Smell / taste / skin,44,0.66
+2023,Health and Household,5449,Price / value,1076,19.75
+2023,Health and Household,5449,Does not work,1059,19.43
+2023,Health and Household,5449,Quality / durability,955,17.53
+2023,Health and Household,5449,Size / fit,715,13.12
+2023,Health and Household,5449,Return / refund,622,11.41
+2023,Health and Household,5449,Smell / taste / skin,605,11.1
+2023,Health and Household,5449,Delivery / packaging,594,10.9
+2023,Health and Household,5449,Not as described,472,8.66
+2023,Health and Household,5449,Battery / charging,179,3.29
+2023,Home and Kitchen,6557,Quality / durability,2078,31.69
+2023,Home and Kitchen,6557,Price / value,1317,20.09
+2023,Home and Kitchen,6557,Size / fit,1149,17.52
+2023,Home and Kitchen,6557,Return / refund,1038,15.83
+2023,Home and Kitchen,6557,Does not work,1020,15.56
+2023,Home and Kitchen,6557,Delivery / packaging,738,11.26
+2023,Home and Kitchen,6557,Not as described,686,10.46
+2023,Home and Kitchen,6557,Smell / taste / skin,193,2.94
+2023,Home and Kitchen,6557,Battery / charging,121,1.85
+2023,Sports and Outdoors,4449,Quality / durability,1492,33.54
+2023,Sports and Outdoors,4449,Size / fit,891,20.03
+2023,Sports and Outdoors,4449,Price / value,831,18.68
+2023,Sports and Outdoors,4449,Return / refund,697,15.67
+2023,Sports and Outdoors,4449,Does not work,678,15.24
+2023,Sports and Outdoors,4449,Delivery / packaging,481,10.81
+2023,Sports and Outdoors,4449,Not as described,381,8.56
+2023,Sports and Outdoors,4449,Battery / charging,127,2.85
+2023,Sports and Outdoors,4449,Smell / taste / skin,59,1.33
+2024,Beauty and Personal Care,9599,Quality / durability,1798,18.73
+2024,Beauty and Personal Care,9599,Price / value,1775,18.49
+2024,Beauty and Personal Care,9599,Does not work,1487,15.49
+2024,Beauty and Personal Care,9599,Smell / taste / skin,1123,11.7
+2024,Beauty and Personal Care,9599,Return / refund,991,10.32
+2024,Beauty and Personal Care,9599,Size / fit,876,9.13
+2024,Beauty and Personal Care,9599,Not as described,863,8.99
+2024,Beauty and Personal Care,9599,Delivery / packaging,822,8.56
+2024,Beauty and Personal Care,9599,Battery / charging,129,1.34
+2024,Books,2218,Price / value,366,16.5
+2024,Books,2218,Not as described,241,10.87
+2024,Books,2218,Size / fit,233,10.5
+2024,Books,2218,Quality / durability,195,8.79
+2024,Books,2218,Does not work,178,8.03
+2024,Books,2218,Return / refund,138,6.22
+2024,Books,2218,Delivery / packaging,97,4.37
+2024,Books,2218,Smell / taste / skin,17,0.77
+2024,Books,2218,Battery / charging,11,0.5
+2024,Electronics,8501,Does not work,3315,39.0
+2024,Electronics,8501,Quality / durability,2324,27.34
+2024,Electronics,8501,Price / value,1738,20.44
+2024,Electronics,8501,Return / refund,1601,18.83
+2024,Electronics,8501,Size / fit,1136,13.36
+2024,Electronics,8501,Battery / charging,1109,13.05
+2024,Electronics,8501,Not as described,978,11.5
+2024,Electronics,8501,Delivery / packaging,621,7.31
+2024,Electronics,8501,Smell / taste / skin,44,0.52
+2024,Health and Household,7896,Does not work,1652,20.92
+2024,Health and Household,7896,Price / value,1456,18.44
+2024,Health and Household,7896,Quality / durability,1358,17.2
+2024,Health and Household,7896,Size / fit,1016,12.87
+2024,Health and Household,7896,Return / refund,955,12.09
+2024,Health and Household,7896,Smell / taste / skin,896,11.35
+2024,Health and Household,7896,Delivery / packaging,730,9.25
+2024,Health and Household,7896,Not as described,710,8.99
+2024,Health and Household,7896,Battery / charging,298,3.77
+2024,Home and Kitchen,9664,Quality / durability,3019,31.24
+2024,Home and Kitchen,9664,Price / value,1854,19.18
+2024,Home and Kitchen,9664,Size / fit,1618,16.74
+2024,Home and Kitchen,9664,Does not work,1549,16.03
+2024,Home and Kitchen,9664,Return / refund,1515,15.68
+2024,Home and Kitchen,9664,Delivery / packaging,1157,11.97
+2024,Home and Kitchen,9664,Not as described,910,9.42
+2024,Home and Kitchen,9664,Smell / taste / skin,277,2.87
+2024,Home and Kitchen,9664,Battery / charging,194,2.01
+2024,Sports and Outdoors,6470,Quality / durability,2061,31.85
+2024,Sports and Outdoors,6470,Size / fit,1299,20.08
+2024,Sports and Outdoors,6470,Price / value,1124,17.37
+2024,Sports and Outdoors,6470,Does not work,994,15.36
+2024,Sports and Outdoors,6470,Return / refund,950,14.68
+2024,Sports and Outdoors,6470,Not as described,597,9.23
+2024,Sports and Outdoors,6470,Delivery / packaging,578,8.93
+2024,Sports and Outdoors,6470,Battery / charging,198,3.06
+2024,Sports and Outdoors,6470,Smell / taste / skin,97,1.5
+2025,Beauty and Personal Care,12625,Price / value,2354,18.65
+2025,Beauty and Personal Care,12625,Quality / durability,2324,18.41
+2025,Beauty and Personal Care,12625,Does not work,1946,15.41
+2025,Beauty and Personal Care,12625,Smell / taste / skin,1449,11.48
+2025,Beauty and Personal Care,12625,Return / refund,1445,11.45
+2025,Beauty and Personal Care,12625,Not as described,1184,9.38
+2025,Beauty and Personal Care,12625,Size / fit,1144,9.06
+2025,Beauty and Personal Care,12625,Delivery / packaging,1103,8.74
+2025,Beauty and Personal Care,12625,Battery / charging,212,1.68
+2025,Books,2536,Price / value,395,15.58
+2025,Books,2536,Size / fit,283,11.16
+2025,Books,2536,Not as described,262,10.33
+2025,Books,2536,Does not work,214,8.44
+2025,Books,2536,Quality / durability,210,8.28
+2025,Books,2536,Return / refund,205,8.08
+2025,Books,2536,Delivery / packaging,129,5.09
+2025,Books,2536,Smell / taste / skin,26,1.03
+2025,Books,2536,Battery / charging,10,0.39
+2025,Electronics,10087,Does not work,3922,38.88
+2025,Electronics,10087,Quality / durability,2817,27.93
+2025,Electronics,10087,Return / refund,2068,20.5
+2025,Electronics,10087,Price / value,2015,19.98
+2025,Electronics,10087,Size / fit,1442,14.3
+2025,Electronics,10087,Battery / charging,1432,14.2
+2025,Electronics,10087,Not as described,1153,11.43
+2025,Electronics,10087,Delivery / packaging,838,8.31
+2025,Electronics,10087,Smell / taste / skin,79,0.78
+2025,Health and Household,11682,Does not work,2600,22.26
+2025,Health and Household,11682,Price / value,2213,18.94
+2025,Health and Household,11682,Quality / durability,2056,17.6
+2025,Health and Household,11682,Return / refund,1503,12.87
+2025,Health and Household,11682,Size / fit,1478,12.65
+2025,Health and Household,11682,Smell / taste / skin,1260,10.79
+2025,Health and Household,11682,Delivery / packaging,1097,9.39
+2025,Health and Household,11682,Not as described,955,8.17
+2025,Health and Household,11682,Battery / charging,517,4.43
+2025,Home and Kitchen,12089,Quality / durability,3773,31.21
+2025,Home and Kitchen,12089,Price / value,2244,18.56
+2025,Home and Kitchen,12089,Does not work,2066,17.09
+2025,Home and Kitchen,12089,Size / fit,2034,16.83
+2025,Home and Kitchen,12089,Return / refund,1997,16.52
+2025,Home and Kitchen,12089,Delivery / packaging,1358,11.23
+2025,Home and Kitchen,12089,Not as described,1232,10.19
+2025,Home and Kitchen,12089,Smell / taste / skin,379,3.14
+2025,Home and Kitchen,12089,Battery / charging,275,2.27
+2025,Sports and Outdoors,8132,Quality / durability,2627,32.3
+2025,Sports and Outdoors,8132,Size / fit,1585,19.49
+2025,Sports and Outdoors,8132,Price / value,1378,16.95
+2025,Sports and Outdoors,8132,Does not work,1347,16.56
+2025,Sports and Outdoors,8132,Return / refund,1267,15.58
+2025,Sports and Outdoors,8132,Delivery / packaging,789,9.7
+2025,Sports and Outdoors,8132,Not as described,709,8.72
+2025,Sports and Outdoors,8132,Battery / charging,344,4.23
+2025,Sports and Outdoors,8132,Smell / taste / skin,124,1.52
+2026,Beauty and Personal Care,13682,Quality / durability,2502,18.29
+2026,Beauty and Personal Care,13682,Price / value,2385,17.43
+2026,Beauty and Personal Care,13682,Does not work,2213,16.17
+2026,Beauty and Personal Care,13682,Smell / taste / skin,1690,12.35
+2026,Beauty and Personal Care,13682,Return / refund,1478,10.8
+2026,Beauty and Personal Care,13682,Not as described,1325,9.68
+2026,Beauty and Personal Care,13682,Delivery / packaging,1280,9.36
+2026,Beauty and Personal Care,13682,Size / fit,1246,9.11
+2026,Beauty and Personal Care,13682,Battery / charging,255,1.86
+2026,Books,2496,Price / value,442,17.71
+2026,Books,2496,Not as described,271,10.86
+2026,Books,2496,Size / fit,258,10.34
+2026,Books,2496,Quality / durability,219,8.77
+2026,Books,2496,Does not work,214,8.57
+2026,Books,2496,Return / refund,188,7.53
+2026,Books,2496,Delivery / packaging,111,4.45
+2026,Books,2496,Smell / taste / skin,26,1.04
+2026,Books,2496,Battery / charging,10,0.4
+2026,Electronics,9653,Does not work,3779,39.15
+2026,Electronics,9653,Quality / durability,2595,26.88
+2026,Electronics,9653,Return / refund,1990,20.62
+2026,Electronics,9653,Price / value,1831,18.97
+2026,Electronics,9653,Size / fit,1390,14.4
+2026,Electronics,9653,Battery / charging,1323,13.71
+2026,Electronics,9653,Not as described,1185,12.28
+2026,Electronics,9653,Delivery / packaging,842,8.72
+2026,Electronics,9653,Smell / taste / skin,66,0.68
+2026,Health and Household,14200,Does not work,3170,22.32
+2026,Health and Household,14200,Quality / durability,2564,18.06
+2026,Health and Household,14200,Price / value,2517,17.73
+2026,Health and Household,14200,Return / refund,1869,13.16
+2026,Health and Household,14200,Size / fit,1756,12.37
+2026,Health and Household,14200,Smell / taste / skin,1561,10.99
+2026,Health and Household,14200,Delivery / packaging,1393,9.81
+2026,Health and Household,14200,Not as described,1198,8.44
+2026,Health and Household,14200,Battery / charging,703,4.95
+2026,Home and Kitchen,12178,Quality / durability,3860,31.7
+2026,Home and Kitchen,12178,Does not work,2174,17.85
+2026,Home and Kitchen,12178,Price / value,2165,17.78
+2026,Home and Kitchen,12178,Return / refund,2029,16.66
+2026,Home and Kitchen,12178,Size / fit,1995,16.38
+2026,Home and Kitchen,12178,Delivery / packaging,1429,11.73
+2026,Home and Kitchen,12178,Not as described,1199,9.85
+2026,Home and Kitchen,12178,Smell / taste / skin,357,2.93
+2026,Home and Kitchen,12178,Battery / charging,311,2.55
+2026,Sports and Outdoors,8825,Quality / durability,2790,31.61
+2026,Sports and Outdoors,8825,Size / fit,1628,18.45
+2026,Sports and Outdoors,8825,Does not work,1445,16.37
+2026,Sports and Outdoors,8825,Price / value,1435,16.26
+2026,Sports and Outdoors,8825,Return / refund,1374,15.57
+2026,Sports and Outdoors,8825,Delivery / packaging,901,10.21
+2026,Sports and Outdoors,8825,Not as described,874,9.9
+2026,Sports and Outdoors,8825,Battery / charging,419,4.75
+2026,Sports and Outdoors,8825,Smell / taste / skin,144,1.63

@@ -1,0 +1,16 @@
+# Large raw / intermediate datasets (>100 MB GitHub limit)
+data/raw/
+data/2023/
+data/2024/
+data/2025/
+data/2026/
+data/processed/
+data/gold/product_recommendations.parquet
+
+# Portable binaries & caches
+tools/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+.DS_Store
+Thumbs.db
