@@ -3,25 +3,23 @@
 # MAGIC # 07 - Interactive Review Analytics Dashboard (Databricks Native)
 # MAGIC Reads directly from the Unity Catalog Delta tables in `workspace.review_analytics`.
 # MAGIC
-# MAGIC **How to present as a Databricks Dashboard:**
-# MAGIC 1. Run all cells once (`Run all`).
-# MAGIC 2. Use the **Widgets** at the top (`year`, `category`, `product_keyword`, `verdict`) to filter.
-# MAGIC 3. Click **View -> Dashboard** (or add cell outputs to a Databricks Dashboard) for a clean presentation view.
-
-# COMMAND ----------
-
-# MAGIC %pip install -q plotly
+# MAGIC **How to use during live demo:**
+# MAGIC 1. Use the interactive filter widgets at the top (`1. Year`, `2. Category`, `3. Product Search`, `4. Verdict Filter`).
+# MAGIC 2. Click **Run all** to refresh every KPI, Spark chart, ML benchmark, Product Advisor table, and Stream monitor.
+# MAGIC 3. Open **View -> Dashboard** -> **Review Sentiment Analytics Dashboard** for a clean executive presentation layout.
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### CELL 1: Setup & Interactive Filter Widgets
+# MAGIC ### CELL 1: Interactive Dashboard Filter Widgets & Palette Configuration
 
 # COMMAND ----------
 
+import matplotlib.pyplot as plt
+import matplotlib.patches as patches
+import numpy as np
+import pandas as pd
 from pyspark.sql import functions as F
-import plotly.express as px
-import plotly.graph_objects as go
 
 DB = "workspace.review_analytics"
 CATEGORIES = [
@@ -44,79 +42,173 @@ sel_cat = dbutils.widgets.get("category")
 sel_kw = dbutils.widgets.get("product_keyword").strip().lower()
 sel_verdict = dbutils.widgets.get("verdict")
 
-print(f"Active Filters -> Year: {sel_year} | Category: {sel_cat} | Product: '{sel_kw}' | Verdict: {sel_verdict}")
+BG_FIG = "#0b1020"
+BG_AX = "#111827"
+GRID_CLR = "#1f2937"
+TEXT_CLR = "#f8fafc"
+MUTED_CLR = "#94a3b8"
+CLR_POS = "#10b981"
+CLR_NEU = "#f59e0b"
+CLR_NEG = "#f43f5e"
+CLR_INDIGO = "#6366f1"
+CLR_TEAL = "#2dd4bf"
+CLR_BLUE = "#60a5fa"
+
+def style_ax(ax, title, xlabel="", ylabel=""):
+    ax.set_facecolor(BG_AX)
+    ax.tick_params(colors=MUTED_CLR, labelsize=10)
+    for spine in ["top", "right"]:
+        ax.spines[spine].set_visible(False)
+    for spine in ["bottom", "left"]:
+        ax.spines[spine].set_color("#334155")
+    ax.grid(axis="y", color=GRID_CLR, linestyle="--", linewidth=0.7, alpha=0.8)
+    ax.set_axisbelow(True)
+    ax.set_title(title, color=TEXT_CLR, fontsize=13, fontweight="bold", pad=14, loc="left")
+    if xlabel:
+        ax.set_xlabel(xlabel, color=MUTED_CLR, fontsize=10, labelpad=8)
+    if ylabel:
+        ax.set_ylabel(ylabel, color=MUTED_CLR, fontsize=10, labelpad=8)
+
+print(f"Active Dashboard Filters -> Year: {sel_year} | Category: {sel_cat} | Product Search: '{sel_kw}' | Verdict: {sel_verdict}")
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### CELL 2: Executive KPIs & 4-Year Sentiment Trajectory
+# MAGIC ### CELL 2: Executive KPI Scorecard (Spark Delta Gold)
 
 # COMMAND ----------
 
 yr_summary = spark.table(f"{DB}.agg_year_summary").toPandas()
-yr_only = yr_summary[yr_summary["year"] != "All"].sort_values("year")
 
 if sel_cat == "All":
     kpi = yr_summary[yr_summary["year"] == sel_year].iloc[0]
-    total_rev, pos_pct, neu_pct, neg_pct, avg_rat = (
-        int(kpi["reviews"]), float(kpi["positive_pct"]), float(kpi["neutral_pct"]),
-        float(kpi["negative_pct"]), float(kpi["avg_rating"])
-    )
+    total_rev = int(kpi["reviews"])
+    pos_pct = float(kpi["positive_pct"])
+    neu_pct = float(kpi["neutral_pct"])
+    neg_pct = float(kpi["negative_pct"])
+    avg_rat = float(kpi["avg_rating"])
 else:
     yc_df = spark.table(f"{DB}.agg_year_category").filter(F.col("category") == sel_cat).toPandas()
     if sel_year != "All":
         yc_df = yc_df[yc_df["year"] == int(sel_year)]
     total_rev = int(yc_df["reviews"].sum())
-    pos_pct = round(yc_df["positive"].sum() * 100 / total_rev, 2)
-    neu_pct = round(yc_df["neutral"].sum() * 100 / total_rev, 2)
-    neg_pct = round(yc_df["negative"].sum() * 100 / total_rev, 2)
-    avg_rat = round((yc_df["avg_rating"] * yc_df["reviews"]).sum() / total_rev, 2)
+    pos_pct = round(yc_df["positive"].sum() * 100.0 / max(total_rev, 1), 2)
+    neu_pct = round(yc_df["neutral"].sum() * 100.0 / max(total_rev, 1), 2)
+    neg_pct = round(yc_df["negative"].sum() * 100.0 / max(total_rev, 1), 2)
+    avg_rat = round((yc_df["avg_rating"] * yc_df["reviews"]).sum() / max(total_rev, 1), 2)
 
-print("=" * 68)
-print(f"  SCOPE: Year = {sel_year}  |  Category = {sel_cat}")
-print(f"  Total Reviews : {total_rev:,}")
-print(f"  Positive      : {pos_pct:.1f}%   |   Neutral : {neu_pct:.1f}%   |   Negative : {neg_pct:.1f}%")
-print(f"  Average Rating: {avg_rat:.2f} / 5.0")
-print("=" * 68)
+fig, ax = plt.subplots(figsize=(13, 2.5), dpi=130)
+fig.patch.set_facecolor(BG_FIG)
+ax.set_facecolor(BG_FIG)
+ax.axis("off")
 
-fig_yr = go.Figure()
-for name, col, clr in [
-    ("Positive", "positive_pct", "#10b981"),
-    ("Neutral", "neutral_pct", "#f59e0b"),
-    ("Negative", "negative_pct", "#f43f5e"),
-]:
-    fig_yr.add_trace(go.Bar(
-        name=name, x=yr_only["year"], y=yr_only[col],
-        marker_color=clr, text=yr_only[col].map(lambda v: f"{v:.1f}%"), textposition="inside",
-    ))
-fig_yr.update_layout(
-    barmode="stack", template="plotly_dark", height=380,
-    title="Four-Year Sentiment Distribution (2023–2026)",
-    yaxis_title="Share of Reviews (%)", xaxis_title="Year",
+ax.text(
+    0.0, 0.94,
+    f"ReviewSense Executive KPIs   |   Scope: Year = {sel_year}   ·   Category = {sel_cat}",
+    color=TEXT_CLR, fontsize=13, fontweight="bold", va="top",
 )
-fig_yr.show()
+
+cards = [
+    ("TOTAL REVIEWS", f"{total_rev:,}", "Gold Delta Lake", CLR_INDIGO),
+    ("POSITIVE SHARE", f"{pos_pct:.1f}%", "4-5 Star Verified", CLR_POS),
+    ("NEUTRAL / NEGATIVE", f"{neu_pct:.1f}% / {neg_pct:.1f}%", "Risk & Watch Segment", CLR_NEG),
+    ("AVERAGE RATING", f"{avg_rat:.2f} / 5.0", "Weighted Customer Score", CLR_TEAL),
+]
+
+for idx, (label, val, sub, accent) in enumerate(cards):
+    x0 = idx * 0.255
+    rect = patches.FancyBboxPatch(
+        (x0, 0.06), 0.235, 0.72,
+        boxstyle="round,pad=0.02,rounding_size=0.04",
+        facecolor=BG_AX, edgecolor=accent, linewidth=1.6,
+    )
+    ax.add_patch(rect)
+    ax.text(x0 + 0.02, 0.68, label, color=MUTED_CLR, fontsize=9, fontweight="bold", va="top")
+    ax.text(x0 + 0.02, 0.44, val, color=TEXT_CLR, fontsize=18, fontweight="bold", va="center")
+    ax.text(x0 + 0.02, 0.16, sub, color=accent, fontsize=9, va="bottom")
+
+ax.set_xlim(-0.01, 1.02)
+ax.set_ylim(0, 1.02)
+plt.tight_layout()
+plt.show()
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### CELL 3: Category Performance & Monthly Trend
+# MAGIC ### CELL 3: Four-Year Sentiment Distribution (2023–2026)
+
+# COMMAND ----------
+
+yr_only = yr_summary[yr_summary["year"] != "All"].sort_values("year")
+x = np.arange(len(yr_only))
+pos_vals = yr_only["positive_pct"].values
+neu_vals = yr_only["neutral_pct"].values
+neg_vals = yr_only["negative_pct"].values
+
+fig, ax = plt.subplots(figsize=(11, 4.4), dpi=130)
+fig.patch.set_facecolor(BG_FIG)
+
+b1 = ax.bar(x, pos_vals, width=0.52, color=CLR_POS, label="Positive")
+b2 = ax.bar(x, neu_vals, width=0.52, bottom=pos_vals, color=CLR_NEU, label="Neutral")
+b3 = ax.bar(x, neg_vals, width=0.52, bottom=pos_vals + neu_vals, color=CLR_NEG, label="Negative")
+
+for i in range(len(x)):
+    ax.text(x[i], pos_vals[i] / 2, f"{pos_vals[i]:.1f}%", ha="center", va="center", color="#052e16", fontweight="bold", fontsize=10)
+    ax.text(x[i], pos_vals[i] + neu_vals[i] / 2, f"{neu_vals[i]:.1f}%", ha="center", va="center", color="#1e293b", fontweight="bold", fontsize=9)
+    ax.text(x[i], pos_vals[i] + neu_vals[i] + neg_vals[i] / 2, f"{neg_vals[i]:.1f}%", ha="center", va="center", color=TEXT_CLR, fontweight="bold", fontsize=10)
+
+ax.set_xticks(x)
+ax.set_xticklabels(yr_only["year"].tolist(), color=TEXT_CLR, fontsize=11, fontweight="bold")
+ax.set_ylim(0, 108)
+style_ax(ax, "Four-Year Sentiment Distribution (2023–2026)", xlabel="Year", ylabel="Share of Reviews (%)")
+ax.legend(loc="upper right", frameon=True, facecolor=BG_AX, edgecolor="#334155", labelcolor=TEXT_CLR, ncol=3)
+plt.tight_layout()
+plt.show()
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### CELL 4: Category-wise Positive Sentiment Across 4 Years
 
 # COMMAND ----------
 
 yc_all = spark.table(f"{DB}.agg_year_category").toPandas()
-yc_all["year_str"] = yc_all["year"].astype(str)
 if sel_cat != "All":
     yc_all = yc_all[yc_all["category"] == sel_cat]
 
-fig_cat = px.bar(
-    yc_all.sort_values(["category", "year_str"]),
-    x="category", y="positive_pct", color="year_str", barmode="group",
-    text_auto=".1f", template="plotly_dark", height=380,
-    title="Category-wise Positive Sentiment Across 4 Years",
-    labels={"positive_pct": "Positive (%)", "category": "Category", "year_str": "Year"},
-)
-fig_cat.update_layout(yaxis_range=[65, 92])
-fig_cat.show()
+piv = yc_all.pivot(index="category", columns="year", values="positive_pct").sort_index()
+years_cols = sorted(piv.columns.tolist())
+cats = piv.index.tolist()
+y_pos = np.arange(len(cats))
+bar_w = 0.18
+yr_colors = [CLR_INDIGO, CLR_BLUE, CLR_TEAL, CLR_POS]
+
+fig, ax = plt.subplots(figsize=(12, 4.8), dpi=130)
+fig.patch.set_facecolor(BG_FIG)
+
+for i, yr_col in enumerate(years_cols):
+    offset = (i - (len(years_cols) - 1) / 2) * bar_w
+    vals = piv[yr_col].values
+    bars = ax.barh(y_pos + offset, vals, height=bar_w * 0.9, color=yr_colors[i % len(yr_colors)], label=str(yr_col))
+    for bar, v in zip(bars, vals):
+        ax.text(v + 0.35, bar.get_y() + bar.get_height() / 2, f"{v:.1f}%", va="center", color=TEXT_CLR, fontsize=8.5)
+
+ax.set_yticks(y_pos)
+ax.set_yticklabels(cats, color=TEXT_CLR, fontsize=10, fontweight="bold")
+ax.set_xlim(62, 95)
+style_ax(ax, "Category-wise Positive Sentiment Across 4 Years (%)", xlabel="Positive Reviews (%)")
+ax.grid(axis="x", color=GRID_CLR, linestyle="--", linewidth=0.7, alpha=0.8)
+ax.grid(axis="y", visible=False)
+ax.legend(loc="lower right", frameon=True, facecolor=BG_AX, edgecolor="#334155", labelcolor=TEXT_CLR, ncol=4)
+plt.tight_layout()
+plt.show()
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### CELL 5: Monthly Positive Sentiment Trajectory
+
+# COMMAND ----------
 
 m_df = spark.table(f"{DB}.agg_monthly")
 if sel_cat != "All":
@@ -126,23 +218,35 @@ if sel_year != "All":
 
 m_pd = (
     m_df.groupBy("review_month")
-    .agg(F.sum("reviews").alias("reviews"),
-         F.round(F.sum("positive") * 100.0 / F.sum("reviews"), 2).alias("positive_pct"))
+    .agg(
+        F.sum("reviews").alias("reviews"),
+        F.round(F.sum("positive") * 100.0 / F.sum("reviews"), 2).alias("positive_pct"),
+    )
     .orderBy("review_month")
     .toPandas()
 )
-fig_m = px.line(
-    m_pd, x="review_month", y="positive_pct", markers=True, template="plotly_dark", height=340,
-    title=f"Monthly Positive Sentiment Trend ({sel_cat} · {sel_year})",
-    labels={"review_month": "Month", "positive_pct": "Positive (%)"},
-)
-fig_m.update_traces(line_color="#2dd4bf")
-fig_m.show()
+
+fig, ax = plt.subplots(figsize=(12, 4.2), dpi=130)
+fig.patch.set_facecolor(BG_FIG)
+
+xm = np.arange(len(m_pd))
+ym = m_pd["positive_pct"].values
+ax.plot(xm, ym, color=CLR_TEAL, linewidth=2.3, marker="o", markersize=4.5)
+ax.fill_between(xm, ym, max(float(ym.min()) - 4, 40), color=CLR_TEAL, alpha=0.14)
+
+step = max(1, len(xm) // 10)
+tick_idx = xm[::step]
+ax.set_xticks(tick_idx)
+ax.set_xticklabels(m_pd["review_month"].iloc[tick_idx].tolist(), rotation=25, ha="right", color=MUTED_CLR, fontsize=9)
+ax.set_ylim(max(float(ym.min()) - 4, 40), min(float(ym.max()) + 4, 96))
+style_ax(ax, f"Monthly Positive Sentiment Trend ({sel_cat} · {sel_year})", xlabel="Month", ylabel="Positive Share (%)")
+plt.tight_layout()
+plt.show()
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### CELL 4: 1–5 Star Distribution & Customer Complaint Themes
+# MAGIC ### CELL 6: 1–5 Star Rating Distribution
 
 # COMMAND ----------
 
@@ -156,15 +260,33 @@ stars_pd = (
     rev_df.withColumn("stars", F.col("rating").cast("int"))
     .groupBy("stars").count().orderBy("stars").toPandas()
 )
-stars_pd["star_label"] = stars_pd["stars"].map(lambda s: f"{s} Star" if s == 1 else f"{s} Stars")
-fig_stars = px.bar(
-    stars_pd, x="star_label", y="count", text_auto=",", template="plotly_dark", height=340,
-    color="star_label",
-    color_discrete_map={"1 Star": "#f43f5e", "2 Stars": "#fb923c", "3 Stars": "#f59e0b", "4 Stars": "#60a5fa", "5 Stars": "#10b981"},
-    title=f"Star Rating Distribution ({sel_cat} · {sel_year})",
+stars_pd["label"] = stars_pd["stars"].map(lambda s: f"{s} Star" if s == 1 else f"{s} Stars")
+star_clrs = {1: CLR_NEG, 2: "#fb923c", 3: CLR_NEU, 4: CLR_BLUE, 5: CLR_POS}
+
+fig, ax = plt.subplots(figsize=(10.5, 4.2), dpi=130)
+fig.patch.set_facecolor(BG_FIG)
+
+bars = ax.bar(
+    stars_pd["label"],
+    stars_pd["count"],
+    width=0.52,
+    color=[star_clrs.get(int(s), CLR_INDIGO) for s in stars_pd["stars"]],
 )
-fig_stars.update_layout(showlegend=False, xaxis_title="", yaxis_title="Reviews")
-fig_stars.show()
+for bar in bars:
+    h = bar.get_height()
+    ax.text(bar.get_x() + bar.get_width() / 2, h * 1.015, f"{int(h):,}", ha="center", va="bottom", color=TEXT_CLR, fontsize=9.5, fontweight="bold")
+
+ax.set_ylim(0, float(stars_pd["count"].max()) * 1.14)
+style_ax(ax, f"Star Rating Distribution ({sel_cat} · {sel_year})", ylabel="Number of Reviews")
+plt.tight_layout()
+plt.show()
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### CELL 7: Customer Complaint Themes (% of Negative Reviews)
+
+# COMMAND ----------
 
 cmp_df = spark.table(f"{DB}.agg_complaints")
 if sel_cat != "All":
@@ -178,19 +300,26 @@ cmp_pd = (
     .orderBy("pct_of_negative")
     .toPandas()
 )
-fig_cmp = px.bar(
-    cmp_pd, x="pct_of_negative", y="theme", orientation="h", text_auto=".1f",
-    color="pct_of_negative", color_continuous_scale="Reds", template="plotly_dark", height=360,
-    title=f"Customer Complaint Themes (% of Negative Reviews · {sel_cat} · {sel_year})",
-    labels={"pct_of_negative": "% of Negative Reviews", "theme": ""},
-)
-fig_cmp.update_layout(coloraxis_showscale=False)
-fig_cmp.show()
+
+fig, ax = plt.subplots(figsize=(11, 4.4), dpi=130)
+fig.patch.set_facecolor(BG_FIG)
+
+bars = ax.barh(cmp_pd["theme"], cmp_pd["pct_of_negative"], height=0.58, color=CLR_NEG)
+for bar in bars:
+    w = bar.get_width()
+    ax.text(w + 0.4, bar.get_y() + bar.get_height() / 2, f"{w:.1f}%", va="center", color=TEXT_CLR, fontsize=9.5, fontweight="bold")
+
+ax.set_xlim(0, float(cmp_pd["pct_of_negative"].max()) * 1.18)
+style_ax(ax, f"Customer Complaint Themes (% of Negative Reviews · {sel_cat} · {sel_year})", xlabel="% of Negative Reviews")
+ax.grid(axis="x", color=GRID_CLR, linestyle="--", linewidth=0.7, alpha=0.8)
+ax.grid(axis="y", visible=False)
+plt.tight_layout()
+plt.show()
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### CELL 5: Top Positive & Negative Words (Lift > 1.3)
+# MAGIC ### CELL 8: Top Positive & Negative Distinctive Words (Lift > 1.3)
 
 # COMMAND ----------
 
@@ -200,49 +329,99 @@ if sel_cat != "All":
 if sel_year != "All":
     words_df = words_df.filter(F.col("year") == int(sel_year))
 
-top_w_pd = (
-    words_df.groupBy("sentiment", "word")
+pos_w = (
+    words_df.filter(F.col("sentiment") == "Positive")
+    .groupBy("word")
     .agg(F.sum("n").alias("mentions"), F.round(F.avg("lift"), 2).alias("avg_lift"))
     .orderBy(F.desc("mentions"))
-    .limit(30)
+    .limit(12)
     .toPandas()
+    .sort_values("mentions")
 )
-fig_w = px.bar(
-    top_w_pd.sort_values("mentions"),
-    x="mentions", y="word", color="sentiment", orientation="h",
-    color_discrete_map={"Positive": "#10b981", "Negative": "#f43f5e"},
-    hover_data=["avg_lift"], template="plotly_dark", height=480,
-    title=f"Distinctive Sentiment Words (Lift > 1.3 · {sel_cat} · {sel_year})",
+neg_w = (
+    words_df.filter(F.col("sentiment") == "Negative")
+    .groupBy("word")
+    .agg(F.sum("n").alias("mentions"), F.round(F.avg("lift"), 2).alias("avg_lift"))
+    .orderBy(F.desc("mentions"))
+    .limit(12)
+    .toPandas()
+    .sort_values("mentions")
 )
-fig_w.show()
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(13.5, 4.8), dpi=130)
+fig.patch.set_facecolor(BG_FIG)
+
+b_pos = ax1.barh(pos_w["word"], pos_w["mentions"], color=CLR_POS, height=0.62)
+for bar, lft in zip(b_pos, pos_w["avg_lift"]):
+    w = bar.get_width()
+    ax1.text(w * 1.02, bar.get_y() + bar.get_height() / 2, f"{int(w):,} ({lft}x)", va="center", color=TEXT_CLR, fontsize=8.5)
+ax1.set_xlim(0, float(pos_w["mentions"].max()) * 1.28)
+style_ax(ax1, f"Top Positive Words ({sel_cat} · {sel_year})", xlabel="Mentions (Avg Lift)")
+ax1.grid(axis="x", color=GRID_CLR, linestyle="--", linewidth=0.7, alpha=0.8)
+ax1.grid(axis="y", visible=False)
+
+b_neg = ax2.barh(neg_w["word"], neg_w["mentions"], color=CLR_NEG, height=0.62)
+for bar, lft in zip(b_neg, neg_w["avg_lift"]):
+    w = bar.get_width()
+    ax2.text(w * 1.02, bar.get_y() + bar.get_height() / 2, f"{int(w):,} ({lft}x)", va="center", color=TEXT_CLR, fontsize=8.5)
+ax2.set_xlim(0, float(neg_w["mentions"].max()) * 1.28)
+style_ax(ax2, f"Top Negative Words ({sel_cat} · {sel_year})", xlabel="Mentions (Avg Lift)")
+ax2.grid(axis="x", color=GRID_CLR, linestyle="--", linewidth=0.7, alpha=0.8)
+ax2.grid(axis="y", visible=False)
+
+plt.tight_layout()
+plt.show()
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### CELL 6: ML Model Benchmark (Naive Bayes vs Logistic Regression vs Random Forest)
+# MAGIC ### CELL 9: PySpark MLlib Classifier Benchmark Chart (80/20 Test Split)
 
 # COMMAND ----------
 
 metrics_pd = spark.table(f"{DB}.model_metrics").orderBy(F.desc("macro_f1")).toPandas()
-display(metrics_pd[["model", "accuracy", "macro_f1", "weighted_f1", "recall_negative", "recall_neutral", "recall_positive", "train_rows", "train_seconds", "is_best"]])
+metric_cols = ["accuracy", "macro_f1", "weighted_f1", "recall_negative", "recall_neutral"]
+metric_labels = ["Accuracy", "Macro F1", "Weighted F1", "Recall (Neg)", "Recall (Neu)"]
 
-melted_m = metrics_pd.melt(
-    id_vars="model",
-    value_vars=["accuracy", "macro_f1", "weighted_f1", "recall_negative", "recall_neutral"],
-    var_name="Metric", value_name="Score",
-)
-fig_ml = px.bar(
-    melted_m, x="Metric", y="Score", color="model", barmode="group",
-    text_auto=".3f", template="plotly_dark", height=360,
-    title="PySpark MLlib Classifier Benchmark (80/20 Held-Out Test Set)",
-)
-fig_ml.update_layout(yaxis_range=[0, 1.05])
-fig_ml.show()
+fig, ax = plt.subplots(figsize=(12, 4.4), dpi=130)
+fig.patch.set_facecolor(BG_FIG)
+
+xm = np.arange(len(metric_cols))
+bw = 0.24
+model_clrs = [CLR_INDIGO, CLR_TEAL, CLR_NEU]
+
+for idx, (_, row) in enumerate(metrics_pd.iterrows()):
+    offset = (idx - (len(metrics_pd) - 1) / 2) * bw
+    vals = [float(row[c]) for c in metric_cols]
+    bars = ax.bar(xm + offset, vals, width=bw * 0.9, color=model_clrs[idx % len(model_clrs)], label=row["model"])
+    for bar, v in zip(bars, vals):
+        ax.text(bar.get_x() + bar.get_width() / 2, v + 0.015, f"{v:.3f}", ha="center", va="bottom", color=TEXT_CLR, fontsize=8.5)
+
+ax.set_xticks(xm)
+ax.set_xticklabels(metric_labels, color=TEXT_CLR, fontsize=10, fontweight="bold")
+ax.set_ylim(0, 1.06)
+style_ax(ax, "PySpark MLlib Classifier Benchmark (80/20 Held-Out Test Set)", ylabel="Score (0.0 – 1.0)")
+ax.legend(loc="upper right", frameon=True, facecolor=BG_AX, edgecolor="#334155", labelcolor=TEXT_CLR, ncol=3)
+plt.tight_layout()
+plt.show()
 
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### CELL 7: Product Search & BUY / DON'T BUY Advisor (from Phase 10–11 Table)
+# MAGIC ### CELL 10: MLlib Model Metrics & Training Runtime Table
+
+# COMMAND ----------
+
+display(metrics_pd[[
+    "model", "accuracy", "macro_f1", "weighted_f1",
+    "recall_negative", "recall_neutral", "recall_positive",
+    "train_rows", "train_seconds", "is_best"
+]])
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### CELL 11: Product Search & BUY / DON'T BUY Advisor (Live Widget Filter)
 
 # COMMAND ----------
 
@@ -263,7 +442,7 @@ display(top_matches.select(
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ### CELL 8: Live Stream Monitor Summary (from Phase 12 Table)
+# MAGIC ### CELL 12: Structured Streaming Category x Sentiment Summary (Phase 12 Delta Table)
 
 # COMMAND ----------
 
@@ -274,6 +453,18 @@ try:
         .count()
         .orderBy("category", "predicted_sentiment")
     )
+except Exception as e:
+    print("Stream table not created yet. Run 06_streaming_reviews.py first:", e)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC ### CELL 13: Structured Streaming Negative Review Alerts
+
+# COMMAND ----------
+
+try:
+    stream_df = spark.table(f"{DB}.stream_scored")
     display(
         stream_df.filter(F.col("is_negative_alert") == True)
         .select("ingested_at", "category", "brand", "product_title", "rating", "predicted_sentiment", "title")
